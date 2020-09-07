@@ -102,6 +102,9 @@
 
 
 
+
+
+
  비기능적 요구사항(검증)
  ![image](https://user-images.githubusercontent.com/63028492/92348874-5caf0980-f10f-11ea-81ea-ad724552de3c.png)
 
@@ -117,9 +120,18 @@
 
 
 
+
+
+
+
+
+
 ## 헥사고날 아키텍처 다이어그램 도출
     
 ![image](https://user-images.githubusercontent.com/63028492/92348104-fb863680-f10c-11ea-9391-be90872b9837.png)
+
+
+
 
 # 구현:
 
