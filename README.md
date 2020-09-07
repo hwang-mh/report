@@ -12,15 +12,12 @@
     - [헥사고날 아키텍처 다이어그램 도출]
   - [구현:](#구현-)
     - [DDD 의 적용](#ddd-의-적용)
-    - [동기식 호출 과 Fallback 처리](#동기식-호출-과-Fallback-처리)
-    - 장애 격리
+    - [Gateway 적용](#Gateway-적용)
     - [비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트](#비동기식-호출-과-Eventual-Consistency)
   - [운영](#운영)
     - [CI/CD 설정](#cicd설정)
     - [오토스케일 아웃](#오토스케일-아웃)
     - [무정지 재배포](#무정지-재배포)
-  - 구현
-  - 운영과 Retirement
 
 # 조직
 - 고객 : 정확한 정보를 입력, 오류를 최소화 한다(Core)
@@ -135,53 +132,70 @@
 
 # 구현:
 
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+분석/설계 단계에서 도출된 헥사고날 아키텍쳐에 따라 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다(각자의 포트 넘버는 8081~ 808n이다)
 
 ```
-cd customer
-mvn spring-boot:run
+cd payment
+mvn spring-boot:run 
 
-cd delivery
+cd reservation
 mvn spring-boot:run 
 
 cd gateway
-mvn spring-boot:run  
+mvn spring-boot:run
+  
 ```
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 Delivery 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다.
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하여 DDD 구현하고자 했다: (예시는 Payment 마이크로 서비스). 
 
 ```
-package local;
+package movie;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="Delivery_table")
-public class Delivery {
+@Table(name="PayProcess_table")
+public class PayProcess extends AbstractEvent{
 
     @Id
-    private Long orderId;
-    private String product;
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    private String cardid;
+    private String customerNm;
     private Integer qty;
-    private String status;
+    private String reservationiId;
 
-    public Long getOrderId() {
-        return orderId;
+    @PostPersist
+    public void onPostPersist(){
+        Payed payed = new Payed();
+        BeanUtils.copyProperties(this, payed);
+        payed.publish();
     }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-    public String getProduct() {
-        return product;
+    public Long getId() {
+        return id;
     }
 
-    public void setProduct(String product) {
-        this.product = product;
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getCardid() {
+        return cardid;
+    }
+
+    public void setCardid(String cardid) {
+        this.cardid = cardid;
+    }
+    public String getCustomerNm() {
+        return customerNm;
+    }
+
+    public void setCustomerNm(String customerNm) {
+        this.customerNm = customerNm;
     }
     public Integer getQty() {
         return qty;
@@ -190,160 +204,77 @@ public class Delivery {
     public void setQty(Integer qty) {
         this.qty = qty;
     }
-
-    public String getStatus() {
-        return status;
+    public String getReservationiId() {
+        return reservationiId;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setReservationiId(String reservationiId) {
+        this.reservationiId = reservationiId;
     }
-
 }
+
 
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package local;
+package movie;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface DeliveryRepository extends PagingAndSortingRepository<Delivery, Long>{
-}
-```
-- 적용 후 REST API 의 테스트
-```
-# Customer 서비스의 주문 처리
-http POST customer:8080/orders product="IceAmericano" qty=1 price=2000
-
-# Delivery 서비스의 승인/거절 처리
-# 주문 승인
-http PUT delivery:8080/deliveries/1 status="receive" product="IceAmericano" qty=1 price=2000
-# 주문 거절
-http PUT delivery:8080/deliveries/1 status="reject" product="IceAmericano" qty=1 price=2000
-
-# 주문 상태 확인 및 View
-http customer:8080/orders/1
-http customer:8080/orderStatuses/1
-```
-
-## 동기식 호출 과 Fallback 처리
-
-주문이 들어오고 결제(외부 API 호출) 처리가 동기식으로 진행되어야 하는 것을 반영하였으며 실제 결제 API를 구현/연동하기에는 무리가 있어 아래와 같이 대체하였다.
-
-- 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
-```
-# (Customer) Order.java
-
-@PostPersist
-public void eventPublish() throws JsonProcessingException {
-    OrderSelected orderSelected = new OrderSelected();
-    BeanUtils.copyProperties(this, orderSelected);
-    orderSelected.publish();
-
-    // 결제 시작
-    if (Math.random() > 0.5){
-        // 결제 성공
-        PaymentCompleted paymentCompleted = new PaymentCompleted();
-        BeanUtils.copyProperties(this, paymentCompleted);
-        paymentCompleted.publish();
-
-    } else {
-        // 결제 실패
-        orderSelected.setPaymentFail(true);
-        orderSelected.publish();
-    }
+public interface PayProcessRepository extends PagingAndSortingRepository<PayProcess, Long>{
 }
 ```
 
-## 장애 격리
+## Gateway 적용
+
+Clous 환경에서는Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정히였다
+
 ```
-# Math.random() > 0.5 이면 결제 서비스가 정상 Response로 가정
+spring:
+  profiles: docker
+  cloud:
+    gateway:
+      routes:
+        - id: reservation
+          uri: http://reservation:8080
+          predicates:
+            - Path=/reservationProcesses/**,/movieLists/**
+        - id: caCenter
+          uri: http://caCenter:8080
+          predicates:
+            - Path= 
+        - id: payment
+          uri: http://payment:8080
+          predicates:
+            - Path=/payProcesses/** 
 
-# 주문 후 결제가 자동으로 진행
-http POST customer:8080/orders product="IceAmericano" qty=1 price=2000    # Success
-http POST customer:8080/orders product="IceAmericano2" qty=1 price=2000   # Fail
-
-# 결제 결과 확인
-http customer:8080/orderStatuses/1   # Status="pay_success"
-http customer:8080/orderStatuses/2   # Status="pay_fail"
 ```
-
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-결제가 이루어진 후에 상점시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 상점 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
- 
-- 이를 위하여 결제 승인이 되었다는 도메인 이벤트를 카프카로 송출한다 (Publish)
+결제가 이루어진 후에 고객에게 알림을 제공한다. 결제 승인이 되었다는 도메인 이벤트를 카프카로 송출한다 (Publish)
  
 ```
-PaymentCompleted paymentCompleted = new PaymentCompleted();
-BeanUtils.copyProperties(this, paymentCompleted);
-paymentCompleted.publish();
-```
-- 상점 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+@PostPersist
+public void onPostPersist(){
+    MovieReserved movieReserved = new MovieReserved();
+    BeanUtils.copyProperties(this, movieReserved);
+    movieReserved.publish();
+}
 
-```
+
 @StreamListener(KafkaProcessor.INPUT)
-public void wheneverPaymentCompleted_OrderFromOrder(@Payload PaymentCompleted paymentCompleted){
+public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 
-    if(paymentCompleted.isMe()){
-
-        Delivery delivery = new Delivery();
-        delivery.setOrderId(paymentCompleted.getOrderId());
-        delivery.setProduct(paymentCompleted.getProduct());
-        delivery.setQty(paymentCompleted.getQty());
-        delivery.setStatus("order_get");
-
-        deliveryRepository.save(delivery);
+    if(movieReserved.isMe()){
+        System.out.println("##### listener Katalk : " + movieReserved.toJson());
     }
 }
-```
-실제 구현 시, 점주는 Delivery UI를 통해 주문에 대한 수락/거절을 한다. (Delivery에 대해 PUT)
-  
-```
-@PostUpdate
-public void onPostUpdate(){
-    if ("receive".equals(this.getStatus())) {
-        OrderReceived orderReceived = new OrderReceived();
-        BeanUtils.copyProperties(this, orderReceived);
-        orderReceived.publishAfterCommit();
-    }
 
-    if ("reject".equals(this.getStatus())) {
-        OrderRejected orderRejected = new OrderRejected();
-        BeanUtils.copyProperties(this, orderRejected);
-        orderRejected.publishAfterCommit();
-    }
-}
 ```
 
-상점 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 상점시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
-```
-# 테스트 편의성을 위해 Local에서 진행
-# 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
-
-#주문처리
-http POST localhost:8081/orders product="IceAmericano" qty=1 price=2000 
-
-#주문상태 확인
-http localhost:8081/orderStatuses/1     # 주문 상태 : pay_success
-
-#상점 서비스 기동
-cd delivery
-mvn spring-boot:run
-
-#상점에서 주문 확인
-http localhost:8084/deliveries/1        # 주문 상태 : order_get
-
-#상점 주인의 수락/거절 진행
-http PUT localhost:8084/deliveries/1 status="receive"
-
-#주문상태 확인
-http localhost:8081/orderStatuses/1     # 주문 상태 : order_received
-```
 
 
 # 운영
