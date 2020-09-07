@@ -67,6 +67,7 @@
 
 ### 이벤트 도출
 ![image](https://user-images.githubusercontent.com/63028492/92348656-ad723280-f10e-11ea-9e1c-c7319e55c7c3.png)
+![image](https://user-images.githubusercontent.com/63028492/92349210-5b321100-f110-11ea-9965-2f84c80b32ae.png)
 
 ### 부적격 이벤트 탈락
 ![image](https://user-images.githubusercontent.com/63028492/92348662-b19e5000-f10e-11ea-99b4-e6a5da6df1e6.png)
