@@ -7,7 +7,7 @@
   - [분석/설계](#분석설계)
     - [AS-IS 조직 (Horizontally-Aligned)]
     - [TO-BE 조직 (Vertically-Aligned)]
-    - [Event Storming 결과-1차, 2차]
+    - [Event Storming 결과]
     - [2차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증]
     - [비기능적 요구사항(검증)]
     - [헥사고날 아키텍처 다이어그램 도출]
@@ -65,59 +65,55 @@
 
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과: 
 
-### 완성된 1차 모형
+### 이벤트 도출
+![image](https://user-images.githubusercontent.com/63028492/92347593-86663180-f10b-11ea-8618-307fb578f43b.png)
 
-![image](https://user-images.githubusercontent.com/63624054/81624992-9ce8ce80-9432-11ea-94ee-47a019a74bcd.png)
+### 부적격 이벤트 탈락
+![image](https://user-images.githubusercontent.com/63028492/92347775-10ae9580-f10c-11ea-8a0c-42ed705d9e01.png)
 
-### 완성된 2차 모형
-![image](https://user-images.githubusercontent.com/63624054/81637640-cd8c3080-9451-11ea-8446-46ec36b17108.png)
+### 어그리게잇으로 묶기
+![image](https://user-images.githubusercontent.com/63028492/92347876-405d9d80-f10c-11ea-911f-2bf2c2e21d6a.png)
 
+### 바운디드 컨텍스트로 묶기
+![image](https://user-images.githubusercontent.com/63028492/92347903-54a19a80-f10c-11ea-9a6d-2fd24d1ba640.png)
 
-    - Order cancel 프로세스 추가 : Event, Policy 추가
-  
-  
-  
+### 완성된 모형
+![image](https://user-images.githubusercontent.com/63028492/92347965-83b80c00-f10c-11ea-9be9-35ece3645d00.png)
 
 ### 2차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
 기능적 요구사항(검증)
-![image](https://user-images.githubusercontent.com/63624054/81644736-48117c00-9463-11ea-8ccc-6d3e4849bea9.png)
+![image](https://user-images.githubusercontent.com/63028492/92348033-bbbf4f00-f10c-11ea-973e-e9bfad69cc72.png)
 
-1. 고객이 온라인으로 주문 내역을 만든다.
-1. 고객이 주문 내역으로 결제한다.
-1. 주문 내역이 결제 되면 해당 내역을 매장에서 접수하거나 거절한다.
-    1. 매장에서 접수하면 커피를 제작하고 고객이 주문을 취소할 수 없다.
-    1. 매장에서 거절하면 주문 내역이 취소되고 결제가 환불 된다.
-1. 고객이 주문 내역을 취소를 요청할 수 있다.
-1. 매장에서 주문 내역 취소 요청을 받으면 취소가 가능하다면 취소한다.
-1. 주문 내역이 취소되면 결제가 환불 된다.
-1. 매장에서 커피가 제작 되면 고객이 주문 건을 픽업한다.
-1. 주문 진행 상태가 바뀔 때 마다 SMS로 알림을 보낸다.
+1. 시스템은 현재 상영중인 영화 정보를 보여준다.
+1. 고객은 보고 싶은 영화를 선택한다.
+1. 시스템은 선택한 영화의 상영가능 영화관과 날짜, 시간를 보여준다.
+1. 고객은 시간을 선택 후 예약현황을 보고 좌석을 선택한다.
+1. 고객은 결제를 요청한다.
+1. 시스템은 결제 기능을 제공한다.
+1. 고객은 MyPage에서 예약된 정보를 조회할 수 있다.
+1. 예약한 정보는 고객은 취소할 수 있다.
+1. 예약 정보가 바뀔때 마다 시스템은 카톡으로 알림을 보낸다.
 
 
 
 
  비기능적 요구사항(검증)
- ![image](https://user-images.githubusercontent.com/63624054/81642399-44c7c180-945e-11ea-8348-23990ab8d40d.png)
+ ![image](https://user-images.githubusercontent.com/63028492/92348053-cc6fc500-f10c-11ea-8847-25d59b606a75.png)
 
 1. 트랜잭션
-    1. 주문시 결제가 성립되어야 한다.  Sync 호출 
+    1. 결재 완료되어야 영화 관람이 가능하다. Sync 호출 
 1. 장애격리
-    1. 매장 서비스가 Down 되어도 주문/취소는 가능해야 한다.  Async (event-driven), Eventual Consistency
+    1. 결재 중 시스템 오류시 결제 보류를 유도한다. Circuit breaker
 1. 성능
-    1. 고객이 주문 진행 상태를 수시로 조회할 수 있어야 한다.  CQRS
-    1. 고객은 주문 진행 상태를 SMS로 확인할 수 있어야 한다.  Event driven
-
-
-## 업무 프로세스 흐름도
-![image](https://user-images.githubusercontent.com/28293389/81764601-e4dc2400-950c-11ea-9898-050e8ff02a71.png)
+    1. 예약상태 변경시마다 카톡등으로 알림을 줄 수 있어야 한다.  Event driven
+    1. 고객이 최종 예약 상태를 확인할수 있어야 한다.  CQRS
 
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-![image](https://user-images.githubusercontent.com/28293389/81763871-3683af00-950b-11ea-96af-5ac25a5631a4.png)
+![image](https://user-images.githubusercontent.com/63028492/92348104-fb863680-f10c-11ea-9391-be90872b9837.png)
 
 # 구현:
 
