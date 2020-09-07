@@ -67,7 +67,7 @@
 
 ### 이벤트 도출
 ![image](https://user-images.githubusercontent.com/63028492/92348656-ad723280-f10e-11ea-9e1c-c7319e55c7c3.png)
-![image](https://user-images.githubusercontent.com/63028492/92349210-5b321100-f110-11ea-9965-2f84c80b32ae.png)
+
 
 ### 부적격 이벤트 탈락
 ![image](https://user-images.githubusercontent.com/63028492/92348662-b19e5000-f10e-11ea-99b4-e6a5da6df1e6.png)
@@ -85,6 +85,7 @@
 
 기능적 요구사항(검증)
 ![image](https://user-images.githubusercontent.com/63028492/92348868-5a4caf80-f10f-11ea-860f-bdcdbfdf42c4.png)
+![image](https://user-images.githubusercontent.com/63028492/92349384-df849400-f110-11ea-8d18-0dafafbb736c.png)
 
 1. 시스템은 현재 상영중인 영화 정보를 보여준다.
 1. 고객은 보고 싶은 영화를 선택한다.
