@@ -67,16 +67,16 @@
 ## Event Storming 결과
 
 ### 이벤트 도출
-![image](https://user-images.githubusercontent.com/63028492/92348199-5324a200-f10d-11ea-9da8-79ba7ab44e8e.png)
+![image](https://user-images.githubusercontent.com/63028492/92348656-ad723280-f10e-11ea-9e1c-c7319e55c7c3.png)
 
 ### 부적격 이벤트 탈락
-![image](https://user-images.githubusercontent.com/63028492/92347775-10ae9580-f10c-11ea-8a0c-42ed705d9e01.png)
+![image](https://user-images.githubusercontent.com/63028492/92348662-b19e5000-f10e-11ea-99b4-e6a5da6df1e6.png)
 
 ### 어그리게잇으로 묶기
-![image](https://user-images.githubusercontent.com/63028492/92347876-405d9d80-f10c-11ea-911f-2bf2c2e21d6a.png)
+![image](https://user-images.githubusercontent.com/63028492/92348665-b4994080-f10e-11ea-8a49-5b9d9af6d213.png)
 
 ### 바운디드 컨텍스트로 묶기
-![image](https://user-images.githubusercontent.com/63028492/92347903-54a19a80-f10c-11ea-9a6d-2fd24d1ba640.png)
+![image](https://user-images.githubusercontent.com/63028492/92348669-b6fb9a80-f10e-11ea-81b1-1683bbf4cd0f.png)
 
 ### 완성된 모형
 ![image](https://user-images.githubusercontent.com/63028492/92347965-83b80c00-f10c-11ea-9be9-35ece3645d00.png)
