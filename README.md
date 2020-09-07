@@ -84,7 +84,7 @@
 ### 2차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
 기능적 요구사항(검증)
-![image](https://user-images.githubusercontent.com/63028492/92348033-bbbf4f00-f10c-11ea-973e-e9bfad69cc72.png)
+![image](https://user-images.githubusercontent.com/63028492/92348868-5a4caf80-f10f-11ea-860f-bdcdbfdf42c4.png)
 
 1. 시스템은 현재 상영중인 영화 정보를 보여준다.
 1. 고객은 보고 싶은 영화를 선택한다.
@@ -103,7 +103,7 @@
 
 
  비기능적 요구사항(검증)
- ![image](https://user-images.githubusercontent.com/63028492/92348053-cc6fc500-f10c-11ea-8847-25d59b606a75.png)
+ ![image](https://user-images.githubusercontent.com/63028492/92348874-5caf0980-f10f-11ea-81ea-ad724552de3c.png)
 
 1. 트랜잭션
     1. 결재 완료되어야 영화 관람이 가능하다. Sync 호출 
