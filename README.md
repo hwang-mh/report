@@ -81,10 +81,9 @@
 ### 완성된 모형
 ![image](https://user-images.githubusercontent.com/63028492/92347965-83b80c00-f10c-11ea-9be9-35ece3645d00.png)
 
-### 2차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
+### 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
 기능적 요구사항(검증)
-![image](https://user-images.githubusercontent.com/63028492/92348868-5a4caf80-f10f-11ea-860f-bdcdbfdf42c4.png)
 ![image](https://user-images.githubusercontent.com/63028492/92349384-df849400-f110-11ea-8d18-0dafafbb736c.png)
 
 1. 시스템은 현재 상영중인 영화 정보를 보여준다.
@@ -107,7 +106,7 @@
 
 
  비기능적 요구사항(검증)
- ![image](https://user-images.githubusercontent.com/63028492/92348874-5caf0980-f10f-11ea-81ea-ad724552de3c.png)
+ ![image](https://user-images.githubusercontent.com/63028492/92349484-38542c80-f111-11ea-86d9-705d3982073f.png)
 
 1. 트랜잭션
     1. 결재 완료되어야 영화 관람이 가능하다. Sync 호출 
