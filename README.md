@@ -329,24 +329,14 @@ reservation-74d75f75d5-wq6vf    1/1     Running   0          82m
 
 ```
 (azure-pipelines.yaml)
-                          readinessProbe:
-                            httpGet:
-                              path: /actuator/health
-                              port: 8080
-                            initialDelaySeconds: 10
-                            timeoutSeconds: 2
-                            periodSeconds: 5
-                            failureThreshold: 10
-                            
-                            
-readinessProbe:
-httpGet:
-    path: /actuator/health
-    port: 8080
-initialDelaySeconds: 10
-timeoutSeconds: 2
-periodSeconds: 5
-failureThreshold: 10
-```
+ readinessProbe:
+ httpGet:
+     path: /actuator/health
+     port: 8080
+ initialDelaySeconds: 10
+ timeoutSeconds: 2
+ periodSeconds: 5
+ failureThreshold: 10
+ 
 ```
 
