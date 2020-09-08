@@ -13,6 +13,7 @@
     - [DDD 의 적용](#ddd-의-적용)
     - [Gateway 적용](#Gateway-적용)
     - [비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트](#비동기식-호출-과-Eventual-Consistency)
+    - [실습 테스트](#실습 테스트)
   - [운영](#운영)
     - [CI/CD 설정](#cicd설정)
     - [오토스케일 아웃](#오토스케일-아웃)
@@ -278,7 +279,19 @@ public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 ```
 
 
-wo
+## 실습 테스트
+
+
+고객이 영화를 예약한다(Publish)
+  ![image](https://user-images.githubusercontent.com/63028492/92446551-f1d5ff00-f1f0-11ea-8e54-2495775d28d9.png)
+
+예약된 정보를 결제한다
+  ![image](https://user-images.githubusercontent.com/63028492/92446581-fd292a80-f1f0-11ea-9047-1953cab68225.png)
+```
+```
+
+
+
 # 운영
 
 ## CI/CD 설정
