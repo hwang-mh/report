@@ -336,15 +336,14 @@ reservation-74d75f75d5-wq6vf    1/1     Running   0          82m
 모든 MSA 서비스에 readiness probe, liveness probe 설정 추가
 (azure-pipelines.yaml)
 
-
 readinessProbe:
-httpGet:
+  httpGet:
      path: /actuator/health
      port: 8080
-initialDelaySeconds: 10
-timeoutSeconds: 2
-periodSeconds: 5
-failureThreshold: 10
+  initialDelaySeconds: 10
+  timeoutSeconds: 2
+  periodSeconds: 5
+  failureThreshold: 10
 livenessProbe:
   httpGet:
      path: /actuator/health
