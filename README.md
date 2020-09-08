@@ -283,7 +283,7 @@ public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 ```
 
 
-
+wo
 # 운영
 
 ## CI/CD 설정
@@ -303,11 +303,8 @@ kubectl autoscale deploy reservation --min=1 --max=5 --cpu-percent=50
 ```
 - 부하 테스트를 위해 cpu-percent를 임시 조정
 ```
-kubectl autoscale deploy customer --min=1 --max=10 --cpu-percent=10
+kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=10
 ```
-![image](https://user-images.githubusercontent.com/63028492/92439059-0c09e000-f1e5-11ea-8a22-a76410296965.png)
-
-
 - siege 를 통해 test를 진행하였으나 충분한 부하가 걸리지 않아 hpa는 확인하지 못하였다.
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
