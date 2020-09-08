@@ -281,12 +281,17 @@ public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 
 ## 실습 테스트
 
-
+```
 고객이 영화를 예약한다(Publish)
-  ![image](https://user-images.githubusercontent.com/63028492/92446551-f1d5ff00-f1f0-11ea-8e54-2495775d28d9.png)
+```
 
+![image](https://user-images.githubusercontent.com/63028492/92446551-f1d5ff00-f1f0-11ea-8e54-2495775d28d9.png)
+
+```
 예약된 정보를 결제한다
-  ![image](https://user-images.githubusercontent.com/63028492/92446581-fd292a80-f1f0-11ea-9047-1953cab68225.png)
+```
+
+![image](https://user-images.githubusercontent.com/63028492/92446581-fd292a80-f1f0-11ea-9047-1953cab68225.png)
 ```
 ```
 
