@@ -333,9 +333,10 @@ reservation-74d75f75d5-wq6vf    1/1     Running   0          82m
 ```
 
 ## 무정지 재배포
-
-* readiness 설정
+모든 MSA 서비스에 readiness probe, liveness probe 설정 추가
 (azure-pipelines.yaml)
+
+
 readinessProbe:
 httpGet:
      path: /actuator/health
@@ -344,7 +345,14 @@ initialDelaySeconds: 10
 timeoutSeconds: 2
 periodSeconds: 5
 failureThreshold: 10
-
+livenessProbe:
+  httpGet:
+     path: /actuator/health
+     port: 8080
+  initialDelaySeconds: 120
+  timeoutSeconds: 2
+  periodSeconds: 5
+  failureThreshold: 5
 
 ```
 
