@@ -325,6 +325,14 @@ reservation-74d75f75d5-wq6vf    1/1     Running   0          82m
 ## 무정지 재배포
 
 * readiness 설정
+readinessProbe:
+httpGet:
+     path: /actuator/health
+     port: 8080
+initialDelaySeconds: 10
+timeoutSeconds: 2
+periodSeconds: 5
+failureThreshold: 10
 
 
 ```
