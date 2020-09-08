@@ -303,6 +303,12 @@ public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 
 각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 Azure(Dev)를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 azure-pipelines.yml 에 포함되었다.
   ![image](https://user-images.githubusercontent.com/63028492/92424007-0cdb4b80-f1be-11ea-86e4-bd66766fa773.png)
+  
+  
+## POD 실행 화면
+
+  ![image](https://user-images.githubusercontent.com/63028492/92448929-4464ea80-f1f4-11ea-97c7-c59f12cb3c57.png)
+  
 
 ### 오토스케일 아웃
 
