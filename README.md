@@ -75,6 +75,13 @@
 ### 바운디드 컨텍스트로 묶기
 ![image](https://user-images.githubusercontent.com/63028492/92348757-fb873600-f10e-11ea-93c3-93b4131f178a.png)
 
+    - 도메인 서열 분리 
+        - Core Domain:  예약 - 없어서는 안될 핵심 서비스이며, 연견 Up-time SLA 수준을 99.999% 목표, 배포주기는 app 의 경우 1주일 1회 미만
+        - Supporting Domain:  알림 - Core Domain을 위한 서비스
+        - General Domain:   결제 : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 
+
+
+
 ### 완성된 모형
 ![image](https://user-images.githubusercontent.com/63028492/92347965-83b80c00-f10c-11ea-9be9-35ece3645d00.png)
 
@@ -288,45 +295,32 @@ public void wheneverMovieReserved_Katalk(@Payload MovieReserved movieReserved){
 
 - Customer/Delivery 서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다.  
   
-    Customer : CPU 사용량이 50프로를 넘어서면 replica를 10개까지 늘려준다(최소 1)  
-    Delivery : CPU 사용량이 50프로를 넘어서면 replica를 5개까지 늘려준다(최소 1)
+    payment : CPU 사용량이 50프로를 넘어서면 replica를 10개까지 늘려준다(최소 1)  
+    reservation : CPU 사용량이 50프로를 넘어서면 replica를 5개까지 늘려준다(최소 1)
 ```
-kubectl autoscale deploy customer --min=1 --max=10 --cpu-percent=50
-kubectl autoscale deploy delivery --min=1 --max=5 --cpu-percent=50
+kubectl autoscale deploy payment  --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy reservation --min=1 --max=5 --cpu-percent=50
 ```
 - 부하 테스트를 위해 cpu-percent를 임시 조정
 ```
 kubectl autoscale deploy customer --min=1 --max=10 --cpu-percent=10
 ```
+![image](https://user-images.githubusercontent.com/63028492/92439059-0c09e000-f1e5-11ea-8a22-a76410296965.png)
 
-- siege 를 통해 부하 Test
-```
-siege -c100 -t120S -r10 -v --content-type "application/json" 'http://customer:8080/orders POST {"product": "iceAmericano", "qty":1, "price":1000}'
-```
+
 - siege 를 통해 test를 진행하였으나 충분한 부하가 걸리지 않아 hpa는 확인하지 못하였다.
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
-pod/customer-6865d894bc-jdkdk   1/1     Running   0          30s
-pod/delivery-68b66976d6-5cxz9   1/1     Running   0          162m
-pod/gateway-7784474fc-cnttl     1/1     Running   0          104m
-pod/httpie                      1/1     Running   2          23h
+cacenter-57d97fd8bf-nqdtj       1/1     Running   0          81m
+gateway-5d96d567db-78m68        1/1     Running   0          99m
+httpie                          1/1     Running   0          97m
+my-nginx-5b8c577c4b-s8cbp       1/1     Running   0          99m
+payment-7649bf8875-fgmqg        1/1     Running   23         99m
+payment-7649bf8875-pl9xq        1/1     Running   23         99m
+payment-7649bf8875-vmplc        1/1     Running   23         99m
+reservation-74d75f75d5-wq6vf    1/1     Running   0          82m
 ```
 ```
-Transactions:                  12858 hits
-Availability:                 100.00 %
-Elapsed time:                 119.46 secs
-Data transferred:               3.42 MB
-Response time:                  0.43 secs
-Transaction rate:             107.63 trans/sec
-Throughput:                     0.03 MB/sec
-Concurrency:                   46.27
-Successful transactions:       12858
-Failed transactions:               0
-Longest transaction:            2.44
-Shortest transaction:           0.00
-```
-
-
 
 ## 무정지 재배포
 
@@ -343,106 +337,5 @@ timeoutSeconds: 2
 periodSeconds: 5
 failureThreshold: 10
 ```
-
-- seige 로 배포작업 직전에 워크로드를 모니터링 함.
-```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://customer:8080/orders POST {"product": "iceAmericano", "qty":1, "price":1000}'
-
-
 ```
 
-- Pipeline을 통한 새버전으로의 배포 시작 - UI
-![image](https://user-images.githubusercontent.com/28293389/81762438-94ae9300-9507-11ea-8e94-8a761529ecac.png)
-
-```
-NAME                            READY   STATUS        RESTARTS   AGE
-pod/customer-5d479469b9-5wlxp   0/1     Terminating   0          55m
-pod/customer-85f968c94c-b254s   1/1     Running       0          87s
-pod/customer-85f968c94c-k5pq4   1/1     Running       0          27s
-pod/customer-85f968c94c-pgwd7   1/1     Running       0          55s
-pod/delivery-78f4bb9f9b-7h42s   1/1     Running       0          54m
-pod/gateway-675c9b584d-tr7cv    1/1     Running       0          17h
-pod/httpie                      1/1     Running       1          18h
-```
-
-
-- seige 의 화면으로 넘어가서 Availability 확인
-```
-defaulting to time-based testing: 120 seconds
-** SIEGE 3.0.8
-** Preparing 100 concurrent users for battle.
-The server is now under siege...
-Lifting the server siege...      done.
-
-Transactions:                  12976 hits
-Availability:                 100.00 %
-Elapsed time:                 119.67 secs
-Data transferred:               3.45 MB
-Response time:                  0.42 secs
-Transaction rate:             108.43 trans/sec
-Throughput:                     0.03 MB/sec
-Concurrency:                   45.44
-Successful transactions:       12976
-Failed transactions:               0
-Longest transaction:            2.29
-Shortest transaction:           0.00
-```
-
-배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
-
-
-## 구현  
-
-기존의 마이크로 서비스에 수정을 발생시키지 않도록 Inbund 요청을 REST 가 아닌 Event 를 Subscribe 하는 방식으로 구현. 기존 마이크로 서비스에 대하여 아키텍처나 기존 마이크로 서비스들의 데이터베이스 구조와 관계없이 추가됨. 
-
-## 운영과 Retirement
-
-Request/Response 방식으로 구현하지 않았기 때문에 서비스가 더이상 불필요해져도 Deployment 에서 제거되면 기존 마이크로 서비스에 어떤 영향도 주지 않음.
-
-* [비교] 결제 (pay) 외부 서비스의 경우 API 변화나 Retire 시에 주문 (customer) 마이크로 서비스의 변경을 초래함:
-
-
-## 시연용 프로세스
-
-- 고객이 온라인으로 주문 내역을 만든다.
-```
-http POST http://customer:8080/orders product="IceAmericano" qty=1 price=2000
-```
-- 고객이 주문 내역으로 결제한다. (외부 API를 통한 동기식 진행)
-```
-http http://customer:8080/orderStatuses
-```
-- 주문 내역이 결제 되면 해당 내역을 매장에서 접수하거나 거절한다.
-```
-http http://delivery:8080/deliveries
-```
-- 매장에서 접수하면 커피를 제작하고 고객이 주문을 취소할 수 없다.
-```
-http PUT http://delivery:8080/deliveries/1 product="IceAmericano" qty=1 status="receive"
-```
-- 매장에서 거절하면 주문 내역이 취소되고 결제가 환불 된다.
-```
-http PUT http://delivery:8080/deliveries/1 product="IceAmericano" qty=1 status="reject"
-```
-- 고객이 주문 내역을 취소를 요청할 수 있다.
-```
-http PUT http://customer:8080/orders/1 product="IceAmericano" qty=1 status="order_cancel_request"
-```
-
-- 매장에서 주문 내역 취소 요청을 받으면 취소가 가능하다면 취소한다.
-```
-http http://delivery:8080/deliveries
-```
-- 주문 내역이 취소되면 결제가 환불 된다.
-- 매장에서 커피가 제작 되면 고객이 주문 건을 픽업한다.
-- 주문 진행 상태가 바뀔 때 마다 SMS로 알림을 보낸다.
-
-## 참고 명령어
-- httpie pod 접속
-```
-kubectl exec -it httpie bin/bash
-```
-- Order Status 확인
-```
-http http://customer:8080/orderStatuses
-```
